@@ -149,6 +149,6 @@ Deze configuraties kunnen gebruikt worden met tools zoals:
 ---
 
 ## 👤 Auteur
-Naam: *[jouw naam]*  
+Naam: *Sitki Eris*  
 Opleiding: Network Engineer  
 Context: Eindwerk / Enterprise Network Design
