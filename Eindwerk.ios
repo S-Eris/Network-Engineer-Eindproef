@@ -1,0 +1,194 @@
+!*******************************************************************************
+!!Access-Switch1
+!!*******************************************************************************
+!! basic config 
+enable
+configure terminal
+
+no ip domain-lookup
+
+line console 0
+logging synchronous
+exit
+
+line vty 0 15
+! exec-timeout 0 0
+logging synchronous
+exit
+
+hostname Access-Switch1
+
+ vlan 10
+ name MGMT
+ 
+
+interface range Gi0/1-2
+ switchport mode access
+ switchport access vlan 10
+ no shutdown
+ exit
+
+ interface range Gi1/0-1
+    switchport trunk encapsulation dot1q
+    switchport mode trunk
+    switchport trunk allowed vlan 10
+    no shutdown
+ exit
+
+!*******************************************************************************
+!!Access-Switch2
+!!*******************************************************************************
+!! basic config 
+enable
+configure terminal
+
+no ip domain-lookup
+
+line console 0
+logging synchronous
+exit
+
+line vty 0 15
+! exec-timeout 0 0
+logging synchronous
+exit
+
+hostname Access-Switch2
+
+ vlan 20
+ name OFFICE
+ 
+
+interface Gi0/1
+ switchport mode access
+ switchport access vlan 20
+ no shutdown
+ exit
+
+ vlan 30
+ name IT
+ 
+
+interface gi0/2
+ switchport mode access
+ switchport access vlan 30
+ no shutdown
+ exit
+
+interface range Gi1/1-2
+    switchport trunk encapsulation dot1q
+    switchport mode trunk
+    switchport trunk allowed vlan 20,30
+    no shutdown
+
+!*******************************************************************************
+!!Access-Switch3
+!!*******************************************************************************
+
+!! basic config
+enable
+configure terminal
+
+no ip domain-lookup
+
+line console 0
+logging synchronous
+exit
+
+line vty 0 15
+! exec-timeout 0 0  
+logging synchronous
+exit
+
+hostname Access-Switch3
+
+ vlan 40
+ name SALES
+ exit
+
+interface range Gi0/1-2
+ switchport mode access
+ switchport access vlan 40
+ no shutdown
+ exit
+
+interface range Gi1/2,Gi1/3
+    switchport trunk encapsulation dot1q
+    switchport mode trunk
+    switchport trunk allowed vlan 40
+    no shutdown
+ exit
+
+!*******************************************************************************
+!!Distri-Switch1
+!!*******************************************************************************
+
+!! basic config
+enable
+configure terminal
+
+no ip domain-lookup
+
+line console 0
+logging synchronous
+exit
+
+line vty 0 15
+! exec-timeout 0 0  
+logging synchronous
+exit
+
+hostname Distri-Switch1
+
+vlan 10
+ name MGMT
+vlan 20
+ name OFFICE
+vlan 30
+ name IT
+vlan 40
+ name SALES
+
+interface range Gi1/0-2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40
+ no shutdown
+ exit
+
+!*******************************************************************************
+!!Distri-Switch2
+!!*******************************************************************************
+
+!! basic config
+enable
+configure terminal
+
+no ip domain-lookup
+
+line console 0
+logging synchronous
+exit
+
+line vty 0 15
+! exec-timeout 0 0  
+logging synchronous
+exit
+
+hostname Distri-Switch2
+
+vlan 10
+ name MGMT
+vlan 20
+ name OFFICE
+vlan 30
+ name IT
+vlan 40
+ name SALES
+
+interface range Gi1/1-3
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40
+ no shutdown
+ exit
