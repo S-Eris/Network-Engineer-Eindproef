@@ -18,11 +18,17 @@ exit
 
 hostname Access-Switch1
 
- vlan 10
+vlan 10
  name MGMT
- 
+vlan 99
+ name NATIVE_VLAN
+exit
 
-interface range Gi0/1-2
+spanning-tree mode rapid-pvst
+spanning-tree pathcost method long
+spanning-tree portfast edge bpduguard default
+
+interface range Gi0/0-1
  switchport mode access
  switchport access vlan 10
  no shutdown
@@ -32,6 +38,7 @@ interface range Gi0/1-2
     switchport trunk encapsulation dot1q
     switchport mode trunk
     switchport trunk allowed vlan 10
+    switchport trunk native vlan 99
     no shutdown
  exit
 
@@ -55,21 +62,25 @@ exit
 
 hostname Access-Switch2
 
- vlan 20
+vlan 20
  name OFFICE
+vlan 30
+ name IT
+vlan 99
+ name NATIVE_VLAN
+exit
  
+spanning-tree mode rapid-pvst
+spanning-tree pathcost method long
+spanning-tree portfast edge bpduguard default
 
-interface Gi0/1
+interface Gi0/0
  switchport mode access
  switchport access vlan 20
  no shutdown
  exit
 
- vlan 30
- name IT
- 
-
-interface gi0/2
+interface gi0/1
  switchport mode access
  switchport access vlan 30
  no shutdown
@@ -79,6 +90,7 @@ interface range Gi1/1-2
     switchport trunk encapsulation dot1q
     switchport mode trunk
     switchport trunk allowed vlan 20,30
+    switchport trunk native vlan 99
     no shutdown
 
 !*******************************************************************************
@@ -102,11 +114,17 @@ exit
 
 hostname Access-Switch3
 
- vlan 40
+vlan 40
  name SALES
- exit
+vlan 99
+ name NATIVE_VLAN
+exit
 
-interface range Gi0/1-2
+spanning-tree mode rapid-pvst
+spanning-tree pathcost method long
+spanning-tree portfast edge bpduguard default
+
+interface range Gi0/0-1
  switchport mode access
  switchport access vlan 40
  no shutdown
@@ -116,6 +134,7 @@ interface range Gi1/2,Gi1/3
     switchport trunk encapsulation dot1q
     switchport mode trunk
     switchport trunk allowed vlan 40
+    switchport trunk native vlan 99
     no shutdown
  exit
 
@@ -148,11 +167,31 @@ vlan 30
  name IT
 vlan 40
  name SALES
+vlan 99
+ name NATIVE_VLAN
+exit
+
+spanning-tree mode rapid-pvst
+spanning-tree pathcost method long
+spanning-tree portfast edge bpduguard default
+spanning-tree vlan 1-4094 priority 8192
+
+interface range gi0/1-2
+channel-group 10 mode active
+
+interface port-channel 10
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport nonegotiate
+ switchport trunk allowed vlan 10,20,30,40
+ switchport trunk native vlan 99
+ exit
 
 interface range Gi1/0-2
  switchport trunk encapsulation dot1q
  switchport mode trunk
  switchport trunk allowed vlan 10,20,30,40
+ switchport trunk native vlan 99
  no shutdown
  exit
 
@@ -185,10 +224,50 @@ vlan 30
  name IT
 vlan 40
  name SALES
+vlan 99
+ name NATIVE_VLAN
+exit
+
+spanning-tree mode rapid-pvst
+spanning-tree pathcost method long
+spanning-tree portfast edge bpduguard default
+spanning-tree vlan 1-4094 priority 16384
+
+interface range gi0/1-2
+channel-group 10 mode active
+
+interface port-channel 10
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport nonegotiate
+ switchport trunk allowed vlan 10,20,30,40
+ switchport trunk native vlan 99
+ exit
 
 interface range Gi1/1-3
  switchport trunk encapsulation dot1q
  switchport mode trunk
  switchport trunk allowed vlan 10,20,30,40
+ switchport trunk native vlan 99
  no shutdown
  exit
+
+
+ !*******************************************************************************
+ !! Router-on-a-stick
+ !!*******************************************************************************
+
+ interface gi0/0
+no shutdown
+interface gi0/0.10
+encapsulation dot1q 10
+ip address 192.168.10.1 255.255.255.0
+interface gi0/0.20
+encapsulation dot1q 20
+ip address 192.168.20.1 255.255.255.0
+interface gi0/0.30
+encapsulation dot1q 30
+ip address 192.168.30.1 255.255.255.0
+interface gi0/0.40
+encapsulation dot1q 40
+ip address 192.168.40.1 255.255.255.0
