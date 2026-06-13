@@ -1,0 +1,7 @@
+---
+- name: Configure OSPFv3 router-id
+  cisco.ios.ios_config:
+    parents:
+      - "router ospfv3 {{ ospfv3.process_id }}"
+    lines:
+      - "router-id {{ ospfv3.router_id }}"

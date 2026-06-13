@@ -1,0 +1,10 @@
+---
+- name: Configure HSRP
+  cisco.ios.ios_config:
+    parents: "interface Vlan{{ item.vlan }}"
+    lines:
+      - standby version 2
+      - standby {{ item.vlan }} ip {{ item.virtual_ip }}
+      - standby {{ item.vlan }} priority {{ item.priority }}
+      - standby {{ item.vlan }} preempt
+  loop: "{{ hsrp }}"

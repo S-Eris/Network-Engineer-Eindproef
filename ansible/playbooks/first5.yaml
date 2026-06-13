@@ -1,0 +1,4 @@
+---
+  - name: First 5 playbook
+    hosts: localhost
+    tasks:

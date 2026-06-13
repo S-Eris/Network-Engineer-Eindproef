@@ -1,0 +1,6 @@
+---
+- name: Configure extended ACLs
+  cisco.ios.ios_config:
+    parents: "ip access-list extended {{ item.name }}"
+    lines: "{{ item.entries }}"
+  loop: "{{ extended_acls }}"

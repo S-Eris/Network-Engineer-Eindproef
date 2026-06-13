@@ -1,0 +1,6 @@
+---
+- name: Configure standard ACLs
+  cisco.ios.ios_config:
+    parents: "ip access-list standard ACL{{ item.acl_number }}"
+    lines: "{{ item.entries }}"
+  loop: "{{ standard_acls }}"

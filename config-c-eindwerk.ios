@@ -272,7 +272,7 @@ interface gi0/0
  no shutdown
 exit
 
-! FIX: cross-link naar Proximus toegevoegd
+! link naar Proximus 
 interface gi0/2
  description LINK-TO-PROXIMUS
  ip address 10.255.0.14 255.255.255.252
@@ -305,6 +305,25 @@ router bgp 65001
  neighbor 10.255.0.13 remote-as 65003
  network 10.10.0.0 mask 255.255.0.0
  redistribute ospf 1 
+exit
+
+
+!IPv6 
+interface gi0/3
+ ipv6 address 2001:db8:0:1::1/64
+ ospfv3 1 ipv6 area 0
+
+interface gi0/1
+ ipv6 address 2001:db8:0:2::1/64
+ ospfv3 1 ipv6 area 0
+
+router ospfv3 1
+ router-id 1.1.1.1
+ address-family ipv6 unicast
+  passive-interface default
+  no passive-interface gi0/3
+  no passive-interface gi0/1
+ exit-address-family
 exit
 
 do write memory
@@ -385,6 +404,24 @@ router bgp 65001
  neighbor 10.255.0.9 remote-as 65002
  network 10.10.0.0 mask 255.255.0.0
  redistribute ospf 1
+exit
+
+!IPv6
+interface gi0/3
+ ipv6 address 2001:db8:0:1::2/64
+ ospfv3 1 ipv6 area 0
+
+interface gi0/1
+ ipv6 address 2001:db8:0:3::1/64
+ ospfv3 1 ipv6 area 0
+
+router ospfv3 1
+ router-id 2.2.2.2
+ address-family ipv6 unicast
+  passive-interface default
+  no passive-interface gi0/3
+  no passive-interface gi0/1
+ exit-address-family
 exit
 
 do write memory
@@ -536,6 +573,39 @@ router ospf 1
  no passive-interface vlan 40
 exit
 
+!IPV6
+interface gi0/0
+ ipv6 address 2001:db8:0:2::2/64
+ ospfv3 1 ipv6 area 0
+
+interface vlan 10
+ ipv6 address 2001:db8:10::1/64
+ ospfv3 1 ipv6 area 0
+
+interface vlan 20
+ ipv6 address 2001:db8:20::1/64
+ ospfv3 1 ipv6 area 0
+
+interface vlan 30
+ ipv6 address 2001:db8:30::1/64
+ ospfv3 1 ipv6 area 0
+
+interface vlan 40
+ ipv6 address 2001:db8:40::1/64
+ ospfv3 1 ipv6 area 0
+
+router ospfv3 1
+ router-id 10.10.10.1
+ address-family ipv6 unicast
+  passive-interface default
+  no passive-interface gi0/0
+  no passive-interface vlan 10
+  no passive-interface vlan 20
+  no passive-interface vlan 30
+  no passive-interface vlan 40
+ exit-address-family
+exit
+
 do write memory
 
 
@@ -683,6 +753,40 @@ router ospf 1
  no passive-interface vlan 20
  no passive-interface vlan 30
  no passive-interface vlan 40
+exit
+
+!IPV6
+interface gi0/0
+ ipv6 address 2001:db8:0:3::2/64
+ ospfv3 1 ipv6 area 0
+
+interface vlan 10
+ ipv6 address 2001:db8:10::2/64
+ ospfv3 1 ipv6 area 0
+
+interface vlan 20
+ ipv6 address 2001:db8:20::2/64
+ ospfv3 1 ipv6 area 0
+
+interface vlan 30
+ ipv6 address 2001:db8:30::2/64
+ ospfv3 1 ipv6 area 0
+
+interface vlan 40
+ ipv6 address 2001:db8:40::2/64
+ ospfv3 1 ipv6 area 0
+
+router ospfv3 1
+ router-id 20.20.20.1
+ !
+ address-family ipv6 unicast
+  passive-interface default
+  no passive-interface gi0/0
+  no passive-interface vlan 10
+  no passive-interface vlan 20
+  no passive-interface vlan 30
+  no passive-interface vlan 40
+ exit-address-family
 exit
 
 do write memory
@@ -990,3 +1094,5 @@ exit
 ! speed auto
 ! shutdown
 ! no shutdown
+
+!! show ospfv3 neighbor

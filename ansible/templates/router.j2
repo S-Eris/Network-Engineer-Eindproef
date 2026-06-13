@@ -1,0 +1,120 @@
+!********************************************
+!! {{ hostname }}
+!!********************************************
+
+enable
+configure terminal
+
+banner motd ^C
+--------------------------
+- Authorized access only -
+--------------------------
+^C
+
+no ip domain-lookup
+ip routing
+ipv6 unicast-routing
+
+hostname {{ hostname }}
+
+enable secret {{ enable_secret }}
+
+service password-encryption
+
+ip domain-name {{ domain_name }}
+
+username {{ local_user.name }} secret {{ local_user.secret }}
+
+crypto key generate rsa general-keys modulus 1024
+
+ip ssh version 2
+
+line console 0
+logging synchronous
+exit
+
+line vty 0 15
+login local
+transport input ssh
+exec-timeout 0 0
+logging synchronous
+exit
+
+interface Loopback{{ loopback.id }}
+ip address {{ loopback.ip }} {{ loopback.mask }}
+no shutdown
+
+{% for intf in interfaces %}
+interface {{ intf.name }}
+description {{ intf.description }}
+
+{% if intf.ip_address == "dhcp" %}
+ip address dhcp
+{% else %}
+ip address {{ intf.ip_address }}
+{% endif %}
+
+{% if intf.ipv6_address == "autoconfig" %}
+ipv6 address autoconfig
+{% else %}
+ipv6 address {{ intf.ipv6_address }} 
+{% endif %}
+
+{% if intf.ip_nat_inside %}
+ip nat inside
+{% endif %}
+
+{% if intf.ip_nat_outside %}
+ip nat outside
+no shutdown
+
+{% endfor %}
+
+{% for subnet in nat_acl %}
+access-list 1 permit {{ subnet }}
+{% endfor %}
+
+ip nat inside source list {{ nat.acl }} interface {{ nat.outside_interface }} overload
+
+{% for route in static_routes %}
+{{ route }}
+{% endfor %}
+
+{% for route in ipv6_routes %}
+{{ route }}
+{% endfor %}
+
+router bgp {{ bgp.asn }}
+
+bgp log-neighbor-changes
+
+{% for n in bgp.ipv4_neighbors %}
+neighbor {{ n.ip }} remote-as {{ n.remote_as }}
+{% endfor %}
+
+{% for n in bgp.ipv6_neighbors %}
+neighbor {{ n.ip }} remote-as {{ n.remote_as }}
+{% endfor %}
+
+address-family ipv4
+  network {{ loopback.ip }} mask 255.255.255.255
+
+{% for n in bgp.ipv4_neighbors %}
+  neighbor {{ n.ip }} activate
+  neighbor {{ n.ip }} default-originate
+{% endfor %}
+
+exit-address-family
+
+address-family ipv6
+
+{% for n in bgp.ipv6_neighbors %}
+  neighbor {{ n.ip }} activate
+  neighbor {{ n.ip }} default-originate
+{% endfor %}
+
+exit-address-family
+
+exit
+
+do write memory

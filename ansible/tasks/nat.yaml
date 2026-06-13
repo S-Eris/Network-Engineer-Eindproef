@@ -1,0 +1,5 @@
+---
+- name: Configure NAT overload
+  cisco.ios.ios_config:
+    lines:
+      - "ip nat inside source list {{ nat.inside_source.acl }} interface {{ nat.inside_source.outside_interface }} overload"

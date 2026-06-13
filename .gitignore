@@ -1,2 +1,4 @@
 *.gns3project
 project-files/
+Gns3-Eindwerk-pfsense
+__pycache__/

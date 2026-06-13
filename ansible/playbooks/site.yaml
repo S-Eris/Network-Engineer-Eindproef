@@ -1,0 +1,46 @@
+---
+- name: Configure Cisco IOS Infrastructure
+  hosts: all
+  gather_facts: false
+  connection: network_cli
+
+  roles:
+    - role: hostnames
+      tags:
+        - hostname
+
+    - role: vlans
+      tags:
+        - vlans
+
+    - role: interfaces
+      tags:
+        - interfaces
+
+    - role: hsrp
+      tags:
+        - hsrp
+
+    - role: standard_acls
+      tags:
+        - standard_acls
+
+    - role: extended_acls
+      tags:
+        - extended_acls
+
+    - role: nat
+      tags:
+        - nat
+
+    - role: ospfv3
+      tags:
+        - ospfv3
+
+    - role: bgp
+      tags:
+        - bgp
+
+    - role: save
+      tags:
+        - save

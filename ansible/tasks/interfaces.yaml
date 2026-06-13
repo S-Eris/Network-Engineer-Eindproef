@@ -1,0 +1,46 @@
+---
+- name: Configure interface descriptions
+  cisco.ios.ios_interfaces:
+    config:
+      - name: "{{ item.name }}"
+        description: "{{ item.description | default(omit) }}"
+        enabled: "{{ not item.shutdown }}"
+  loop: "{{ interfaces }}"
+
+- name: Configure L3 interfaces
+  cisco.ios.ios_l3_interfaces:
+    config:
+      - name: "{{ item.name }}"
+        ipv4:
+          - address: "{{ item.ip_address }}"
+        ipv6:
+          - address: "{{ item.ipv6_address }}"
+  loop: "{{ interfaces }}"
+  when:
+    - item.ip_address is defined
+      or item.ipv6_address is defined
+
+- name: Configure access ports
+  cisco.ios.ios_l2_interfaces:
+    config:
+      - name: "{{ item.name }}"
+        mode: access
+        access:
+          vlan: "{{ item.access_vlan }}"
+  loop: "{{ interfaces }}"
+  when:
+    - item.switchport_mode is defined
+    - item.switchport_mode == "access"
+
+- name: Configure trunk ports
+  cisco.ios.ios_l2_interfaces:
+    config:
+      - name: "{{ item.name }}"
+        mode: trunk
+        trunk:
+          native_vlan: "{{ item.native_vlan }}"
+          allowed_vlans: "{{ item.allowed_vlans }}"
+  loop: "{{ interfaces }}"
+  when:
+    - item.switchport_mode is defined
+    - item.switchport_mode == "trunk"

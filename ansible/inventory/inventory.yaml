@@ -1,0 +1,619 @@
+---
+all:
+  children:
+
+    wan:
+      hosts:
+        WAN-ROUTER:
+          ansible_host: 10.10.10.150
+          ansible_network_os: ios
+          ansible_connection: network_cli
+
+          interfaces:
+            - name: Loopback1
+              description: WAN-Loopback
+              ip_address: 10.10.10.150/32
+              shutdown: false
+
+            - name: GigabitEthernet0/0
+              description: LINK-TO-INTERNET
+              ip_address_dhcp: true
+              ipv6_address_autoconfig: true
+              ip_nat_inside: false
+              ip_nat_outside: true
+              shutdown: false
+
+            - name: GigabitEthernet0/1
+              description: LINK-TO-TELENET
+              ip_address: 10.255.1.1/30
+              ipv6_address: 2001:db8:1::1/64
+              ip_nat_inside: true
+              ip_nat_outside: false
+              shutdown: false
+
+            - name: GigabitEthernet0/2
+              description: LINK-TO-PROXIMUS
+              ip_address: 10.255.1.5/30
+              ipv6_address: 2001:db8:2::1/64
+              ip_nat_inside: true
+              ip_nat_outside: false
+              shutdown: false
+
+            - name: GigabitEthernet0/3
+              description: LINK-TO-SITE-B
+              ip_address: 10.255.2.1/30
+              ipv6_address: 2001:db8:3::1/64
+              ip_nat_inside: true
+              ip_nat_outside: false
+              shutdown: false
+
+          standard_acls:
+            - name: ACL-WAN-TO-INTERNET
+              type: standard
+              rules:
+                - action: permit
+                  source: 10.10.0.0 0.0.255.255
+                - action: permit
+                  source: 10.0.0.0 0.0.255.255
+                - action: permit
+                  source: 10.255.0.0 0.0.255.255
+                - action: permit
+                  source: 10.20.40.0 0.0.0.255
+
+          nat:
+            inside_source:
+              acl: 1
+              outside_interface: GigabitEthernet0/0
+              overload: true
+            inside_interfaces:
+              - GigabitEthernet0/1
+              - GigabitEthernet0/2
+              - GigabitEthernet0/3
+            outside_interfaces:
+              - GigabitEthernet0/0
+
+          extended_acls: []
+
+          bgp:
+            as_number: 65000
+
+            neighbors_ipv4:
+              - neighbor: 10.255.1.2
+                remote_as: 65002
+              - neighbor: 10.255.1.6
+                remote_as: 65003
+              - neighbor: 10.255.2.2
+                remote_as: 65004
+
+            neighbors_ipv6:
+              - neighbor: 2001:db8:1::2
+                remote_as: 65002
+              - neighbor: 2001:db8:2::2
+                remote_as: 65003
+              - neighbor: 2001:db8:3::2
+                remote_as: 65004
+
+            networks_ipv4:
+              - 10.10.10.150 mask 255.255.255.255
+
+            networks_ipv6: []
+
+          ospfv3: {}
+
+    providers:
+      hosts:
+
+        TELENET:
+          ansible_host: 10.10.10.120
+          ansible_network_os: ios
+          ansible_connection: network_cli
+
+          interfaces:
+            - name: Loopback1
+              description: Provider-Loopback
+              ip_address: 10.10.10.120/32
+              shutdown: false
+
+            - name: GigabitEthernet0/0
+              description: LINK-TO-WAN
+              ip_address: 10.255.1.2/30
+              ipv6_address: 2001:db8:1::2/64
+              shutdown: false
+
+            - name: GigabitEthernet0/1
+              description: LINK-TO-R-CORE-1
+              ip_address: 10.255.0.2/30
+              ipv6_address: 2001:db8:10::2/64
+              shutdown: false
+
+            - name: GigabitEthernet0/2
+              description: LINK-TO-R-CORE-2
+              ip_address: 10.255.0.9/30
+              ipv6_address: 2001:db8:12::1/64
+              shutdown: false
+
+          standard_acls: []
+          extended_acls: []
+
+          bgp:
+            as_number: 65002
+
+            neighbors_ipv4:
+              - neighbor: 10.255.1.1
+                remote_as: 65000
+              - neighbor: 10.255.0.1
+                remote_as: 65001
+              - neighbor: 10.255.0.10
+                remote_as: 65001
+
+            neighbors_ipv6:
+              - neighbor: 2001:db8:1::1
+                remote_as: 65000
+              - neighbor: 2001:db8:10::1
+                remote_as: 65001
+              - neighbor: 2001:db8:12::2
+                remote_as: 65001
+
+            networks_ipv4:
+              - 10.10.10.120 mask 255.255.255.255
+
+            networks_ipv6: []
+
+          ospfv3: {}
+
+        PROXIMUS:
+          ansible_host: 10.10.10.121
+          ansible_network_os: ios
+          ansible_connection: network_cli
+
+          interfaces:
+            - name: Loopback1
+              description: Provider-Loopback
+              ip_address: 10.10.10.121/32
+              shutdown: false
+
+            - name: GigabitEthernet0/0
+              description: LINK-TO-WAN
+              ip_address: 10.255.1.6/30
+              ipv6_address: 2001:db8:2::2/64
+              shutdown: false
+
+            - name: GigabitEthernet0/1
+              description: LINK-TO-R-CORE-2
+              ip_address: 10.255.0.6/30
+              ipv6_address: 2001:db8:20::2/64
+              shutdown: false
+
+            - name: GigabitEthernet0/2
+              description: LINK-TO-R-CORE-1
+              ip_address: 10.255.0.13/30
+              ipv6_address: 2001:db8:13::1/64
+              shutdown: false
+
+          standard_acls: []
+          extended_acls: []
+
+          bgp:
+            as_number: 65003
+
+            neighbors_ipv4:
+              - neighbor: 10.255.1.5
+                remote_as: 65000
+              - neighbor: 10.255.0.5
+                remote_as: 65001
+              - neighbor: 10.255.0.14
+                remote_as: 65001
+
+            neighbors_ipv6:
+              - neighbor: 2001:db8:2::1
+                remote_as: 65000
+              - neighbor: 2001:db8:20::1
+                remote_as: 65001
+              - neighbor: 2001:db8:13::2
+                remote_as: 65001
+
+            networks_ipv4:
+              - 10.10.10.121 mask 255.255.255.255
+
+            networks_ipv6: []
+
+          ospfv3: {}
+
+    core:
+      hosts:
+
+        R-CORE-1:
+          ansible_host: 10.10.10.110
+          ansible_network_os: ios
+          ansible_connection: network_cli
+
+          interfaces:
+            - name: Loopback1
+              description: Core-Loopback
+              ip_address: 10.10.10.110/32
+              shutdown: false
+
+          standard_acls: []
+          extended_acls: []
+
+          bgp:
+            as_number: 65001
+
+            neighbors_ipv4:
+              - neighbor: 10.255.0.2
+                remote_as: 65002
+              - neighbor: 10.255.0.13
+                remote_as: 65003
+
+            neighbors_ipv6:
+              - neighbor: 2001:db8:10::2
+                remote_as: 65002
+              - neighbor: 2001:db8:13::1
+                remote_as: 65003
+
+            networks_ipv4:
+              - 10.10.0.0 mask 255.255.0.0
+
+            networks_ipv6:
+              - 2001:db8::/32
+
+          ospfv3:
+            process_id: 1
+            router_id: 1.1.1.1
+
+            areas:
+              - area: 0
+                interfaces:
+                  - GigabitEthernet0/1
+                  - GigabitEthernet0/3
+
+        R-CORE-2:
+          ansible_host: 10.10.10.111
+          ansible_network_os: ios
+          ansible_connection: network_cli
+
+          standard_acls: []
+          extended_acls: []
+
+          bgp:
+            as_number: 65001
+
+            neighbors_ipv4:
+              - neighbor: 10.255.0.6
+                remote_as: 65003
+              - neighbor: 10.255.0.9
+                remote_as: 65002
+
+            neighbors_ipv6:
+              - neighbor: 2001:db8:20::2
+                remote_as: 65003
+              - neighbor: 2001:db8:12::1
+                remote_as: 65002
+
+            networks_ipv4:
+              - 10.10.0.0 mask 255.255.0.0
+
+            networks_ipv6:
+              - 2001:db8::/32
+
+          ospfv3:
+            process_id: 1
+            router_id: 2.2.2.2
+
+            areas:
+              - area: 0
+                interfaces:
+                  - GigabitEthernet0/1
+                  - GigabitEthernet0/3
+
+
+distribution:
+  hosts:
+
+    Distri-Switch1:
+      ansible_host: 10.10.10.2
+      ansible_network_os: ios
+      ansible_connection: network_cli
+
+      vlans:
+        - id: 10
+          name: MGMT
+
+        - id: 20
+          name: OFFICE
+
+        - id: 30
+          name: IT
+
+        - id: 40
+          name: SALES
+
+        - id: 99
+          name: NATIVE_VLAN
+
+      interfaces:
+        - name: Vlan10
+          description: GATEWAY-MGMT
+          ip_address: 10.10.10.2/24
+          ipv6_address: 2001:db8:10::1/64
+          shutdown: false
+
+        - name: Vlan20
+          description: GATEWAY-OFFICE
+          ip_address: 10.10.20.2/24
+          ipv6_address: 2001:db8:20::1/64
+          shutdown: false
+
+        - name: Vlan30
+          description: GATEWAY-IT
+          ip_address: 10.10.30.2/24
+          ipv6_address: 2001:db8:30::1/64
+          shutdown: false
+
+        - name: Vlan40
+          description: GATEWAY-SALES
+          ip_address: 10.10.40.2/24
+          ipv6_address: 2001:db8:40::1/64
+          shutdown: false
+
+        - name: GigabitEthernet0/0
+          description: LINK-TO-R-CORE-1
+          no_switchport: true
+          ip_address: 10.0.0.6/30
+          ipv6_address: 2001:db8:0:2::2/64
+          shutdown: false
+
+      hsrp:
+        - vlan: 10
+          virtual_ip: 10.10.10.254
+          priority: 110
+          preempt: true
+
+        - vlan: 20
+          virtual_ip: 10.10.20.254
+          priority: 110
+          preempt: true
+
+        - vlan: 30
+          virtual_ip: 10.10.30.254
+          priority: 90
+          preempt: true
+
+        - vlan: 40
+          virtual_ip: 10.10.40.254
+          priority: 90
+          preempt: true
+
+      etherchannels:
+        - id: 10
+          mode: active
+          members:
+            - GigabitEthernet0/1
+            - GigabitEthernet0/2
+
+      spanning_tree:
+        mode: rapid-pvst
+        root_primary_vlans:
+          - 10
+          - 20
+        root_secondary_vlans:
+          - 30
+          - 40
+
+      ospfv3:
+        process_id: 1
+        router_id: 10.10.10.1
+
+    Distri-Switch2:
+      ansible_host: 10.10.10.3
+      ansible_network_os: ios
+      ansible_connection: network_cli
+
+      vlans:
+        - id: 10
+          name: MGMT
+
+        - id: 20
+          name: OFFICE
+
+        - id: 30
+          name: IT
+
+        - id: 40
+          name: SALES
+
+        - id: 99
+          name: NATIVE_VLAN
+
+      interfaces:
+        - name: Vlan10
+          description: GATEWAY-MGMT
+          ip_address: 10.10.10.3/24
+          ipv6_address: 2001:db8:10::2/64
+          shutdown: false
+
+        - name: Vlan20
+          description: GATEWAY-OFFICE
+          ip_address: 10.10.20.3/24
+          ipv6_address: 2001:db8:20::2/64
+          shutdown: false
+
+        - name: Vlan30
+          description: GATEWAY-IT
+          ip_address: 10.10.30.3/24
+          ipv6_address: 2001:db8:30::2/64
+          shutdown: false
+
+        - name: Vlan40
+          description: GATEWAY-SALES
+          ip_address: 10.10.40.3/24
+          ipv6_address: 2001:db8:40::2/64
+          shutdown: false
+
+        - name: GigabitEthernet0/0
+          description: LINK-TO-R-CORE-2
+          no_switchport: true
+          ip_address: 10.0.0.10/30
+          ipv6_address: 2001:db8:0:3::2/64
+          shutdown: false
+
+      hsrp:
+        - vlan: 10
+          virtual_ip: 10.10.10.254
+          priority: 90
+          preempt: true
+
+        - vlan: 20
+          virtual_ip: 10.10.20.254
+          priority: 90
+          preempt: true
+
+        - vlan: 30
+          virtual_ip: 10.10.30.254
+          priority: 110
+          preempt: true
+
+        - vlan: 40
+          virtual_ip: 10.10.40.254
+          priority: 110
+          preempt: true
+
+      etherchannels:
+        - id: 10
+          mode: active
+          members:
+            - GigabitEthernet0/1
+            - GigabitEthernet0/2
+
+      spanning_tree:
+        mode: rapid-pvst
+        root_primary_vlans:
+          - 30
+          - 40
+        root_secondary_vlans:
+          - 10
+          - 20
+
+      ospfv3:
+        process_id: 1
+        router_id: 20.20.20.1
+
+access_switches:
+  hosts:
+
+    Access-Switch1:
+      ansible_host: 10.10.10.100
+      ansible_network_os: ios
+      ansible_connection: network_cli
+
+      vlans:
+        - id: 10
+          name: MGMT
+
+        - id: 99
+          name: NATIVE_VLAN
+
+      interfaces:
+        - name: GigabitEthernet0/0
+          description: END-DEVICES-MGMT
+          switchport_mode: access
+          access_vlan: 10
+          spanning_tree_portfast: true
+          shutdown: false
+
+        - name: GigabitEthernet0/1
+          description: END-DEVICES-MGMT
+          switchport_mode: access
+          access_vlan: 10
+          spanning_tree_portfast: true
+          shutdown: false
+
+      spanning_tree:
+        mode: rapid-pvst
+
+    Access-Switch2:
+      ansible_host: 10.10.10.101
+      ansible_network_os: ios
+      ansible_connection: network_cli
+
+      vlans:
+        - id: 10
+          name: MGMT
+
+        - id: 20
+          name: OFFICE
+
+        - id: 30
+          name: IT
+
+      interfaces:
+        - name: GigabitEthernet0/0
+          description: END-DEVICES-OFFICE
+          switchport_mode: access
+          access_vlan: 20
+          shutdown: false
+
+        - name: GigabitEthernet0/1
+          description: END-DEVICES-IT
+          switchport_mode: access
+          access_vlan: 30
+          shutdown: false
+
+      spanning_tree:
+        mode: rapid-pvst
+
+    Access-Switch3:
+      ansible_host: 10.10.10.103
+      ansible_network_os: ios
+      ansible_connection: network_cli
+
+      vlans:
+        - id: 10
+          name: MGMT
+
+        - id: 40
+          name: SALES
+
+      interfaces:
+        - name: GigabitEthernet0/0
+          description: END-DEVICES-SALES
+          switchport_mode: access
+          access_vlan: 40
+          shutdown: false
+
+        - name: GigabitEthernet0/1
+          description: END-DEVICES-SALES
+          switchport_mode: access
+          access_vlan: 40
+          shutdown: false
+
+      spanning_tree:
+        mode: rapid-pvst
+
+    Access-Switch-B:
+      ansible_host: 10.20.40.2
+      ansible_network_os: ios
+      ansible_connection: network_cli
+
+      vlans:
+        - id: 40
+          name: SALES
+
+      interfaces:
+        - name: GigabitEthernet0/0
+          description: TO-R-SITE-B
+          switchport_mode: access
+          access_vlan: 40
+          shutdown: false
+
+        - name: GigabitEthernet0/1
+          description: TO-PC
+          switchport_mode: access
+          access_vlan: 40
+          shutdown: false
+  vars:
+    ansible_user: admin
+    ansible_password: cisco
+    ansible_become: yes
+    ansible_become_method: enable
+    ansible_become_password: cisco

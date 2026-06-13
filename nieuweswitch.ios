@@ -1,0 +1,58 @@
+enable
+configure terminal
+
+banner motd ^C
+--------------------------
+- Authorized access only -
+--------------------------
+^C
+
+no ip domain-lookup
+ip routing
+ipv6 unicast-routing
+hostname SW-1
+
+enable secret cisco
+service password-encryption
+
+ip domain-name cisco.local
+username admin secret cisco
+crypto key generate rsa general-keys modulus 1024
+ip ssh version 2
+
+line console 0
+ logging synchronous
+exit
+
+line vty 0 15
+ login local
+ transport input ssh
+ exec-timeout 0 0
+ logging synchronous
+exit
+
+
+interface loopback1
+  ip address 10.10.10.210 255.255.255.255
+   ipv6 enable
+   ospfv3 1 ipv4 area 0
+  no shutdown
+
+
+router ospfv3 1
+ router-id 40.40.40.1
+
+ address-family ipv4 unicast
+  passive-interface default
+  no passive-interface gi0/0
+ exit-address-family
+
+ address-family ipv6 unicast
+  passive-interface default
+  no passive-interface gi0/0
+  no passive-interface vlan 10
+  no passive-interface vlan 20
+  no passive-interface vlan 30
+  no passive-interface vlan 40
+ exit-address-family
+exit

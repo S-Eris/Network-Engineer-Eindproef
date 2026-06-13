@@ -35,6 +35,10 @@ line vty 0 15
 exit
 
 
+interface Loopback1
+  ip address 10.10.10.150 255.255.255.255
+  no shutdown
+
  interface gi0/0
  description LINK-TO-INTERNET
  ip address dhcp
@@ -361,6 +365,9 @@ description LINK-TO-DISTRI-SW1
  no shutdown
 exit
 
+interface loopback 1
+ip address 10.10.10.110
+
 !IPv6 + OSPFv3 configuratie met ipv4 en ipv6 in hetzelfde OSPFv3 proces
 
 router ospfv3 1
@@ -370,6 +377,7 @@ router ospfv3 1
   passive-interface default
   no passive-interface gi0/3
   no passive-interface gi0/1
+  no passive-interface loopback 1
   default-information originate always
   redistribute bgp 65001 
  exit-address-family
@@ -965,6 +973,8 @@ line vty 0 15
  logging synchronous
 exit
 
+vlan 10
+ name MGMT
 vlan 20
  name OFFICE
 vlan 30
@@ -973,11 +983,15 @@ vlan 99
  name NATIVE_VLAN
 exit
 
-! FIX: aparte interface vlan commando's ipv range
 interface vlan 20
  no shutdown
 exit
 interface vlan 30
+ no shutdown
+exit
+
+interface vlan 10
+ ip address 10.10.10.101 255.255.255.0
  no shutdown
 exit
 
@@ -1038,6 +1052,8 @@ line vty 0 15
  logging synchronous
 exit
 
+vlan 10
+ name MGMT
 vlan 40
  name SALES
 vlan 99
@@ -1045,6 +1061,11 @@ vlan 99
 exit
 
 interface vlan 40
+ no shutdown
+exit
+
+interface vlan 10
+ ip address 10.10.10.102 255.255.255.0
  no shutdown
 exit
 
